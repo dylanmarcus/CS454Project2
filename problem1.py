@@ -1,8 +1,12 @@
 import numpy as np
 
 
-# Generates table of k by 10 in size.
-# table[i][j] = the concatenation of (0-k) and (0-9) mod k
+"""
+table is an NFA that rejects any int (as a string) that is not
+divisible by k, where table[i] is an NFA stateand table[j] is
+the transition on any given state. So table[i][j] determines
+what state will be reached, given a transition.
+"""
 def makeTable(k):
 	table = [[None for i in range(10)] for i in range(k)]
 	for i in range(k):
@@ -11,8 +15,9 @@ def makeTable(k):
 	return table
 
 
-# Returns if n is a multiple of the k used to generate the table
+# function to traverse an NFA, given a string n
 def isMultiple(n, table):
+	# state 0 is the starting and accepting state in all cases
 	state = 0
 	for digit in n:
 		state = table[state][int(digit)]
@@ -23,16 +28,32 @@ def isMultiple(n, table):
 
 def isNotStrongMultiple(k, n):
 	table = makeTable(k)
+	accepted = []
+	accepted.append(isMultiple(n, table))
+	# remove each digit from n (one at a time), resulting in Nj
+	# and run Nj through the NFA
+	for digit in range(len(n)):
+		accepted.append(isMultiple(n[:digit] + n[digit+1:], table))
+	if True in accepted:
+		print("no")
+	else:
+		print("yes")
+
+	"""
+	-MORE EFFICENT VERSION BUT INSTRUCTIONS SAY TO USE A LIST OF BOOLS-
+	table = makeTable(k)
 	if isMultiple(n, table):
 		return False
-	# for every digit in n, see if (n minus that digit) is a multible of k
+	# remove each digit from n (one at a time), resulting in Nj
+	# and run Nj through the NFA
 	for digit in range(len(n)):
 		if isMultiple(n[:digit] + n[digit+1:], table):
 			return False
 	return True
+	"""
 
 
 
 k = input("k: ")
 n = input("n: ")
-print isNotStrongMultiple(k, str(n))
+isNotStrongMultiple(k, str(n))
