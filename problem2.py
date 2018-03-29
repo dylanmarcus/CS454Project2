@@ -2,7 +2,7 @@ import re
 
 # using 're' to run grep/regexp commands through python
 # to run on command line, use:
-# grep -E '.*([a-z])\1.*([a-z])\2.*' ./words.txt > output.txt
+# grep -E '.*([a-zA-Z])\1.*([a-zA-Z])\2.*' ./words.txt > output.txt
 # this will output all the correct expressions to a file called output.txt in your cwd
 
 
@@ -17,7 +17,7 @@ def main():
             continue
         if fileName.find(".txt"):
             break
-    regex = ".*([a-z])" + '\\' + "1.*([a-z])" + '\\' + "2.*"
+    regex = ".*([a-zA-Z])" + '\\' + "1.*([a-zA-Z])" + '\\' + "2.*"
     pattern = re.compile(regex)
     for i, line in enumerate(open(fileName)):
         for match in re.finditer(pattern, line):
