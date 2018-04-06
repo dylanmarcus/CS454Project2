@@ -1,59 +1,35 @@
-import numpy as np
+from __future__ import print_function
 
 
-"""
-table is an NFA that rejects any int (as a string) that is not
-divisible by k, where table[i] is an NFA stateand table[j] is
-the transition on any given state. So table[i][j] determines
-what state will be reached, given a transition.
-"""
-def makeTable(k):
-	table = [[None for i in range(10)] for i in range(k)]
-	for i in range(k):
+def makeNFA(k):
+	# A DFA to that accepts multiples of k has k+1 states where the starting
+	# state q0 has identical transitions as q1, where q1 is the accepting state.
+	# This is so the DFA does not accept the null string.
+	# The NFA to solve the problem is made of 2 copies of the DFA.
+	NFA = [[ [] for i in range(10)] for i in range((k+1)*2)]
+	for i in range(k+1):
 		for j in range(10):
-			table[i][j] = int( str(i) + str(j) ) % k
-	return table
+			# q0 and q1 (of each of the two sub-DFAs) have identical transitions
+			if i == 1:
+				NFA[i][j].append((int( str(i-1) + str(j) ) % k) + 1)
+				NFA[i+k+1][j].append((int( str(i-1) + str(j) ) % k) + k + 2)
+			else:
+				NFA[i][j].append((int( str(i) + str(j) ) % k) + 1)
+				NFA[i+k+1][j].append((int( str(i) + str(j) ) % k) + k + 2)
+	# Each state of the first sub-DFA has additional transitions (on 0-9) to
+	# their corresponding states of the second sub-DFA.
+	for i in range(k+1):
+		for j in range(10):
+			NFA[i][j].append(i + k + 1)
+
+	return NFA
 
 
-# function to traverse an NFA, given a string n
-def isMultiple(n, table):
-	# state 0 is the starting and accepting state in all cases
-	state = 0
-	for digit in n:
-		state = table[state][int(digit)]
-	if state == 0:
-		return True
-	return False
+NFA = makeNFA(3)
 
-
-def isNotStrongMultiple(k, n):
-	table = makeTable(k)
-	accepted = []
-	accepted.append(isMultiple(n, table))
-	# remove each digit from n (one at a time), resulting in Nj
-	# and run Nj through the NFA
-	for digit in range(len(n)):
-		accepted.append(isMultiple(n[:digit] + n[digit+1:], table))
-	if True in accepted:
-		print("no")
-	else:
-		print("yes")
-
-	"""
-	-MORE EFFICENT VERSION BUT INSTRUCTIONS SAY TO USE A LIST OF BOOLS-
-	table = makeTable(k)
-	if isMultiple(n, table):
-		return False
-	# remove each digit from n (one at a time), resulting in Nj
-	# and run Nj through the NFA
-	for digit in range(len(n)):
-		if isMultiple(n[:digit] + n[digit+1:], table):
-			return False
-	return True
-	"""
-
-
-
-k = input("k: ")
-n = input("n: ")
-isNotStrongMultiple(k, str(n))
+# Print out NFA just so we can visualize it
+for i in range(8):
+	print(str(i) + "| ", end='')
+	for j in range(10):
+		print(" " + str(NFA[i][j]) + " ", end='')
+	print('\n')
