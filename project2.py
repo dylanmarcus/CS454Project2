@@ -1,58 +1,57 @@
 import re
 
 
-def MinString(d_values, k_value):
-    # This makes our DFA table using the d_values which is 0-9
-    grid = [[0 for x in range(len(d_values))] for y in range(k_value + k_value)]
-    for i in range(k_value + k_value):
-        for j in range(len(d_values)):
-            if i < k_value:
-                grid[i][j] = [int(str(i) + str(d_values[j])) % k_value, i + k_value]
+def MinString(digits, k):
+    table = [[0 for i in range(len(digits))] for i in range(2*k)]
+    for i in range(k + k):
+        for j in range(len(digits)):
+            if i < k:
+                table[i][j] = [int(str(i) + str(digits[j])) % k, i + k]
             else:
-                grid[i][j] = (int(str(i) + str(d_values[j])) % k_value)
-    return grid
+                table[i][j] = (int(str(i) + str(digits[j])) % k)
+    return table
 
 
-def make_NFA(k_Value):
-    NFA = MinString([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], k_Value)
-    print("Printing NFA")
-    print(*NFA[0: 9], sep='\n')
+def makeNFA(k):
+    NFA = MinString([i for i in range(10)], k)
+    return NFA
 
 
-def strongly_divisible(k_value):
-    make_NFA(k_value)
+def isStronglyDivisible(k, n):
+    inputString = list(n)
+    bools = []
 
-    # store N in an array
-    n_value = input("n: ")
-    val_list = list(n_value)
+    state = 0
+    for i in range(len(inputString)):
+        state = (state * 10 + int(inputString[i])) % k
+        if state == 0:
+            bools.append(1)
+        else:
+        	bools.append(0)
 
-    # checks the first number to see if it is strongly divisible
-    current = 0
-    for i in range(len(val_list)):
-        current = (current * 10 + int(val_list[i])) % k_value
-        if current == 0:
-            return 1
+    for i in range(0, len(n)):
+        inputString.pop(i)
 
-    # will remove one number at a time from the input N and check each sub
-    # number to see if it is strongly divisble
-    for i in range(0, len(n_value)):
-        val_list.pop(i)
+        state = 0
+        for i in range(len(inputString)):
+            state = (state * 10 + int(inputString[i])) % k
 
-        # checks to see if the sub number is strongly divisble
-        # Long version of moding a number
-        current = 0
-        for i in range(len(val_list)):
-            current = (current * 10 + int(val_list[i])) % k_value
+        if state == 0:
+            bools.append(1)
+        else:
+        	bools.append(0)
+        inputString = list(n)
 
-        if current == 0:
-            return 1
-        val_list = list(n_value)
+    if 0 in bools:
+    	return 0
+    return 1
+
+
 
 
 def main():
     while True:
         try:
-            # print ("Which problem would you like to run: 1 or 2?")
             problem = int(input("Which problem would you like to run: 1, 2, or 3 (0 to quit): "))
         except ValueError:
             continue
@@ -60,11 +59,12 @@ def main():
             break
         if problem == 1:
             k = int(input("k: "))
-            if strongly_divisible(k) == 1:
-                print("No: It is not strongly not divisible")
+            print(*makeNFA(k)[0: 9], sep='\n')
+            n = input("n: ")
+            if isStronglyDivisible(k, n):
+                print("YES, " + n + " is strongly divisible by " + str(k))
             else:
-                print("Yes: It is strongly not divisible")
-            print(' ')
+                print("NO, " + n + " is not strongly divisible by " + str(k))
 
         if problem == 2:
             fileName = "words.txt"
